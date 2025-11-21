@@ -1,29 +1,26 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/cpp
+// For format details, see https://aka.ms/devcontainer.json.
 {
-	"name": "C++",
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
-	"features": {
-		"ghcr.io/devcontainers/features/git-lfs:1": {},
-		"ghcr.io/devcontainers/features/node:1": {},
-		"ghcr.io/shyim/devcontainers-features/bun": {},
-		"ghcr.io/devcontainers-extra/features/actions-runner": {}
-	}
+  "name": "C++",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
 
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+  "features": {
+    "ghcr.io/devcontainers/features/git-lfs:1": {},
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/shyim/devcontainers-features/bun": {},
+    "ghcr.io/devcontainers-extra/features/actions-runner": {},
+    "ghcr.io/dhoeric/features/act": {}
+  },
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+  // Mount host Git credentials & SSH keys
+  "mounts": [
+    "type=bind,source=${env:HOME}/.ssh,target=/home/vscode/.ssh"
+  ],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "gcc -v",
+  // Fix SSH key permissions (otherwise GitHub SSH will fail)
+  "postCreateCommand": "chmod 600 ~/.ssh/id_rsa 2>/dev/null || true",
 
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+  // Run container as normal VS Code user
+  "remoteUser": "vscode"
 }
