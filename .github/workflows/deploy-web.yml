@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+    
 
 jobs:
   deploy:
@@ -30,8 +31,8 @@ jobs:
         
         with:
           cloudflare-api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          cloudflare-account-id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          cloudflare-project-name: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
+          cloudflare-account-id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          cloudflare-project-name: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
           directory: web
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          github-environment: ${{ vars.CLOUDFLARE_PROJECT_NAME }} ${{ (github.ref == 'refs/heads/main' && '(Production)') || '(Preview)' }}
+          # github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-environment: ${{ secrets.CLOUDFLARE_PROJECT_NAME }} ${{ (github.ref == 'refs/heads/main' && '(Production)') || '(Preview)' }}
