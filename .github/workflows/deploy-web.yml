@@ -1,39 +1,47 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: 'Deployment'
+name: Deployment
+
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
-  workflow_dispatch: 
-    
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: cloudflare-pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy:
+    runs-on: ubuntu-latest
     permissions:
-      # actions: read # Only required for private GitHub Repo
       contents: read
       deployments: write
       pull-requests: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node_version: 20
+          node-version: 20
+          cache: "npm"
+
       - run: npm ci
       - run: npm run build
+
       - name: Deploy to Cloudflare Pages
-        uses: andykenward/github-actions-cloudflare-pages@v3.0.0
-        id: pages
-        
+        uses: cloudflare/pages-action@v1
         with:
-          cloudflare-api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          cloudflare-account-id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          cloudflare-project-name: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
-          directory: web
-          # github-token: ${{ secrets.GITHUB_TOKEN }}
-          github-environment: ${{ secrets.CLOUDFLARE_PROJECT_NAME }} ${{ (github.ref == 'refs/heads/main' && '(Production)') || '(Preview)' }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+          directory: ./web   # <-- or your build output dir
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post Deployment URL on PR
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Preview URL: ${{ steps.deploy.outputs.url }}"
