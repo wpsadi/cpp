@@ -10,7 +10,8 @@
     "ghcr.io/devcontainers/features/node:1": {},
     "ghcr.io/shyim/devcontainers-features/bun": {},
     "ghcr.io/devcontainers-extra/features/actions-runner": {},
-    "ghcr.io/dhoeric/features/act": {}
+    "ghcr.io/dhoeric/features/act": {},
+    "ghcr.io/devcontainers/features/docker-in-docker": {}
   },
 
   // Mount host Git credentials & SSH keys
