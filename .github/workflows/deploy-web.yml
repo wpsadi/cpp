@@ -1,57 +1,57 @@
-# Fixed Cloudflare Pages deployment workflow
-name: Deployment
+# # Fixed Cloudflare Pages deployment workflow
+# name: Deployment
 
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-  workflow_dispatch:
+# on:
+#   push:
+#     branches: [master]
+#   pull_request:
+#     branches: [master]
+#   workflow_dispatch:
 
-concurrency:
-  group: cloudflare-pages-${{ github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: cloudflare-pages-${{ github.ref }}
+#   cancel-in-progress: true
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      deployments: write
-      pull-requests: write
-      issues: write
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: read
+#       deployments: write
+#       pull-requests: write
+#       issues: write
 
-    steps:
-      - uses: actions/checkout@v4
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+#       - name: Setup Bun
+#         uses: oven-sh/setup-bun@v2
+#         with:
+#           bun-version: latest
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-        working-directory: ./web
+#       - name: Install dependencies
+#         run: bun install --frozen-lockfile
+#         working-directory: ./web
 
-      - name: Build project
-        run: bun run build
-        working-directory: ./web
+#       - name: Build project
+#         run: bun run build
+#         working-directory: ./web
 
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        id: deploy
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
-          directory: web       # <-- set this to your actual build output folder (for example: web/dist)
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Deploy to Cloudflare Pages
+#         uses: cloudflare/pages-action@v1
+#         id: deploy
+#         with:
+#           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+#           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+#           projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+#           directory: web       # <-- set this to your actual build output folder (for example: web/dist)
+#           githubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Post Deployment URL on PR
-        if: github.event_name == 'pull_request'
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            Preview URL: ${{ steps.deploy.outputs.url }}
+#       - name: Post Deployment URL on PR
+#         if: github.event_name == 'pull_request'
+#         uses: peter-evans/create-or-update-comment@v4
+#         with:
+#           token: ${{ secrets.GITHUB_TOKEN }}
+#           issue-number: ${{ github.event.pull_request.number }}
+#           body: |
+#             Preview URL: ${{ steps.deploy.outputs.url }}
