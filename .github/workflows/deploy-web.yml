@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Fixed Cloudflare Pages deployment workflow
 name: Deployment
 
 on:
@@ -19,26 +19,25 @@ jobs:
       contents: read
       deployments: write
       pull-requests: write
+      issues: write
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-          directory: web       # <--- Change to your actual output folder
           cache-dependency-path: web/package-lock.json
-          
 
       - name: Install dependencies
         run: npm ci
-        working-directory: web
+        working-directory: ./web
 
       - name: Build project
         run: npm run build
-        working-directory: web
+        working-directory: ./web
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
@@ -47,10 +46,14 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
-          directory: web       # <--- Change to your actual output folder
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          directory: web       # <-- set this to your actual build output folder (for example: web/dist)
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Post Deployment URL on PR
         if: github.event_name == 'pull_request'
-        run: |
-          echo "Preview URL: ${{ steps.deploy.outputs.url }}"
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Preview URL: ${{ steps.deploy.outputs.url }}
